@@ -1,0 +1,44 @@
+{
+	"schemaVersion": 1,
+	"id": "itsmystory",
+	"version": "${version}",
+	"name": "It's My Story",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/itsmystory/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"ru.mjkey.ItsMyStory"
+		],
+		"client": [
+			"ru.mjkey.ItsMyStoryClient"
+		],
+		"fabric-datagen": [
+			"ru.mjkey.ItsMyStoryDataGenerator"
+		]
+	},
+	"mixins": [
+		"itsmystory.mixins.json",
+		{
+			"config": "itsmystory.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.18.1",
+		"minecraft": "~1.21.10",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
