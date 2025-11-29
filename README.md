@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/Minecraft-1.21.1-62B47A?style=for-the-badge&logo=minecraft" alt="Minecraft"/>
+  <img src="https://img.shields.io/badge/Minecraft-1.21.10-62B47A?style=for-the-badge&logo=minecraft" alt="Minecraft"/>
   <img src="https://img.shields.io/badge/Fabric-0.18.1-DBB77A?style=for-the-badge" alt="Fabric"/>
   <img src="https://img.shields.io/badge/Status-В_разработке-FF6B6B?style=for-the-badge" alt="Status"/>
 </p>
