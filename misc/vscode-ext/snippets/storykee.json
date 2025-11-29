@@ -1,0 +1,343 @@
+{
+  "NPC Declaration": {
+    "prefix": "npc",
+    "body": [
+      "npc ${1:npcId} {",
+      "\tname: \"${2:NPC Name}\";",
+      "\tskin: \"${3:skin_name}\";",
+      "\tposition: vec3(${4:0}, ${5:64}, ${6:0});",
+      "\tinvulnerable: ${7|true,false|};",
+      "}"
+    ],
+    "description": "Create a new NPC declaration"
+  },
+  "Dialogue Declaration": {
+    "prefix": "dialogue",
+    "body": [
+      "dialogue ${1:dialogueId} {",
+      "\tspeaker: \"${2:Speaker Name}\";",
+      "\t",
+      "\tnode start {",
+      "\t\ttext: \"${3:Hello!}\";",
+      "\t\tchoices: [",
+      "\t\t\t{ text: \"${4:Option 1}\", next: \"${5:node1}\" },",
+      "\t\t\t{ text: \"${6:Goodbye}\", next: \"end\" }",
+      "\t\t];",
+      "\t}",
+      "\t",
+      "\tnode ${5:node1} {",
+      "\t\ttext: \"${7:Response}\";",
+      "\t}",
+      "}"
+    ],
+    "description": "Create a new dialogue with nodes"
+  },
+  "Dialogue Node": {
+    "prefix": "node",
+    "body": [
+      "node ${1:nodeName} {",
+      "\ttext: \"${2:Dialogue text}\";",
+      "\t${3|next: \"nextNode\";,choices: [\\n\\t\\t{ text: \"Option\", next: \"node\" }\\n\\t];|};",
+      "}"
+    ],
+    "description": "Create a dialogue node"
+  },
+  "Quest Declaration": {
+    "prefix": "quest",
+    "body": [
+      "quest ${1:questId} {",
+      "\ttitle: \"${2:Quest Title}\";",
+      "\tdescription: \"${3:Quest description}\";",
+      "\t",
+      "\tobjectives: [",
+      "\t\t{",
+      "\t\t\tid: \"${4:objective1}\";",
+      "\t\t\tdescription: \"${5:Objective description}\";",
+      "\t\t\ttype: \"${6|interact_npc,kill_entity,collect_item,reach_location,custom|}\";",
+      "\t\t\ttarget: \"${7:target}\";",
+      "\t\t\tcount: ${8:1};",
+      "\t\t}",
+      "\t];",
+      "\t",
+      "\trewards: {",
+      "\t\texperience: ${9:100};",
+      "\t\titems: [",
+      "\t\t\t{ item: \"${10:minecraft:diamond}\", count: ${11:1} }",
+      "\t\t];",
+      "\t};",
+      "}"
+    ],
+    "description": "Create a new quest"
+  },
+  "Event Handler - Player Join": {
+    "prefix": "on-join",
+    "body": [
+      "on playerJoin {",
+      "\tvar player = event.player;",
+      "\t${1:// Handle player join}",
+      "}"
+    ],
+    "description": "Player join event handler"
+  },
+  "Event Handler - NPC Interact": {
+    "prefix": "on-npc",
+    "body": [
+      "on npcInteract {",
+      "\tvar npcName = event.npc;",
+      "\tvar player = event.player;",
+      "\t",
+      "\tif (npcName == \"${1:npcId}\") {",
+      "\t\tshowDialogue(player, \"${2:dialogueId}\");",
+      "\t}",
+      "}"
+    ],
+    "description": "NPC interaction event handler"
+  },
+  "Event Handler - Region Enter": {
+    "prefix": "on-region",
+    "body": [
+      "on regionEnter {",
+      "\tvar regionId = event.region;",
+      "\tvar player = event.player;",
+      "\t",
+      "\tif (regionId == \"${1:regionName}\") {",
+      "\t\t${2:// Handle region enter}",
+      "\t}",
+      "}"
+    ],
+    "description": "Region enter event handler"
+  },
+  "Event Handler - Quest Complete": {
+    "prefix": "on-quest",
+    "body": [
+      "on questComplete {",
+      "\tvar questId = event.quest;",
+      "\tvar player = event.player;",
+      "\t",
+      "\tif (questId == \"${1:questId}\") {",
+      "\t\t${2:// Handle quest completion}",
+      "\t}",
+      "}"
+    ],
+    "description": "Quest complete event handler"
+  },
+  "Event Handler - Entity Death": {
+    "prefix": "on-death",
+    "body": [
+      "on entityDeath {",
+      "\tvar entityId = event.entity;",
+      "\tvar player = event.player;",
+      "\t",
+      "\tif (entityId == \"${1:entityId}\") {",
+      "\t\t${2:// Handle entity death}",
+      "\t}",
+      "}"
+    ],
+    "description": "Entity death event handler"
+  },
+  "Function Declaration": {
+    "prefix": "func",
+    "body": [
+      "function ${1:functionName}(${2:params}) {",
+      "\t${3:// Function body}",
+      "}"
+    ],
+    "description": "Create a new function"
+  },
+  "If Statement": {
+    "prefix": "if",
+    "body": [
+      "if (${1:condition}) {",
+      "\t${2:// code}",
+      "}"
+    ],
+    "description": "If statement"
+  },
+  "If-Else Statement": {
+    "prefix": "ifelse",
+    "body": [
+      "if (${1:condition}) {",
+      "\t${2:// if true}",
+      "} else {",
+      "\t${3:// if false}",
+      "}"
+    ],
+    "description": "If-else statement"
+  },
+  "For Loop": {
+    "prefix": "for",
+    "body": [
+      "for (var ${1:i} = ${2:0}; ${1:i} < ${3:10}; ${1:i} = ${1:i} + 1) {",
+      "\t${4:// loop body}",
+      "}"
+    ],
+    "description": "For loop"
+  },
+  "While Loop": {
+    "prefix": "while",
+    "body": [
+      "while (${1:condition}) {",
+      "\t${2:// loop body}",
+      "}"
+    ],
+    "description": "While loop"
+  },
+  "Variable Declaration": {
+    "prefix": "var",
+    "body": [
+      "var ${1:name} = ${2:value};"
+    ],
+    "description": "Declare a variable"
+  },
+  "Vec3 Position": {
+    "prefix": "vec3",
+    "body": [
+      "vec3(${1:x}, ${2:y}, ${3:z})"
+    ],
+    "description": "Create a 3D vector position"
+  },
+  "Give Item": {
+    "prefix": "give",
+    "body": [
+      "giveItem(${1:player}, \"${2:minecraft:diamond}\", ${3:1});"
+    ],
+    "description": "Give item to player"
+  },
+  "Send Message": {
+    "prefix": "msg",
+    "body": [
+      "sendMessage(${1:player}, \"${2:message}\");"
+    ],
+    "description": "Send message to player"
+  },
+  "Show Dialogue": {
+    "prefix": "showdlg",
+    "body": [
+      "showDialogue(${1:player}, \"${2:dialogueId}\");"
+    ],
+    "description": "Show dialogue to player"
+  },
+  "Start Quest": {
+    "prefix": "startq",
+    "body": [
+      "startQuest(${1:player}, \"${2:questId}\");"
+    ],
+    "description": "Start quest for player"
+  },
+  "Play Sound": {
+    "prefix": "sound",
+    "body": [
+      "playSound(${1:player}, \"${2:minecraft:entity.player.levelup}\", ${3:1.0}, ${4:1.0});"
+    ],
+    "description": "Play sound for player"
+  },
+  "Play Music": {
+    "prefix": "music",
+    "body": [
+      "playMusic(${1:player}, \"${2:music_track}\", ${3|true,false|}, ${4:1.0});"
+    ],
+    "description": "Play music for player"
+  },
+  "Spawn Particles": {
+    "prefix": "particles",
+    "body": [
+      "spawnParticles(\"${1:minecraft:heart}\", vec3(${2:0}, ${3:64}, ${4:0}), ${5:10}, ${6:1.0});"
+    ],
+    "description": "Spawn particles at position"
+  },
+  "Schedule Delayed": {
+    "prefix": "delay",
+    "body": [
+      "scheduleDelayed(${1:1000}, ${2:functionName}${3:, args});"
+    ],
+    "description": "Schedule delayed function call"
+  },
+  "Show Title": {
+    "prefix": "title",
+    "body": [
+      "showTitle(\"${1:Title}\", \"${2:Subtitle}\", ${3:10}, ${4:40}, ${5:10});"
+    ],
+    "description": "Show title on screen"
+  },
+  "Get Player Variable": {
+    "prefix": "getvar",
+    "body": [
+      "getPlayerVar(${1:player}, \"${2:varName}\")"
+    ],
+    "description": "Get player variable"
+  },
+  "Set Player Variable": {
+    "prefix": "setvar",
+    "body": [
+      "setPlayerVar(${1:player}, \"${2:varName}\", ${3:value});"
+    ],
+    "description": "Set player variable"
+  },
+  "Spawn Boss": {
+    "prefix": "boss",
+    "body": [
+      "var bossId = spawnBoss(\"${1:bossId}\", {",
+      "\tname: \"${2:Boss Name}\",",
+      "\tentityType: \"${3:minecraft:zombie}\",",
+      "\thealth: ${4:100},",
+      "\tdamage: ${5:10},",
+      "\tposition: vec3(${6:0}, ${7:64}, ${8:0}),",
+      "\tphases: [",
+      "\t\t{",
+      "\t\t\thealthThreshold: 1.0,",
+      "\t\t\tabilities: [\"${9:attack}\"]",
+      "\t\t},",
+      "\t\t{",
+      "\t\t\thealthThreshold: 0.5,",
+      "\t\t\tabilities: [\"${9:attack}\", \"${10:special}\"]",
+      "\t\t}",
+      "\t]",
+      "});",
+      "showBossBar(player, bossId, \"${2:Boss Name}\", \"${11|red,green,blue,yellow,purple,white|}\");"
+    ],
+    "description": "Spawn a boss with phases"
+  },
+  "Cutscene": {
+    "prefix": "cutscene",
+    "body": [
+      "startCutscene(${1:player}, {",
+      "\tdisableMovement: true,",
+      "\thideHUD: true,",
+      "\twaypoints: [",
+      "\t\t{ position: vec3(${2:0}, ${3:80}, ${4:-20}), lookAt: vec3(${5:0}, ${6:64}, ${7:0}), duration: ${8:3000} }",
+      "\t],",
+      "\tonComplete: ${9:onCutsceneEnd}",
+      "});"
+    ],
+    "description": "Start a cutscene"
+  },
+  "Java Section": {
+    "prefix": "java",
+    "body": [
+      "#java-section-start",
+      "import net.minecraft.server.level.ServerPlayer;",
+      "",
+      "public class ${1:ClassName} {",
+      "\tpublic static void ${2:methodName}(ServerPlayer player) {",
+      "\t\t${3:// Java code}",
+      "\t}",
+      "}",
+      "#java-section-end"
+    ],
+    "description": "Embedded Java code section"
+  },
+  "Story Header": {
+    "prefix": "story",
+    "body": [
+      "// ============================================",
+      "// ${1:Story Name}",
+      "// ============================================",
+      "// ${2:Description}",
+      "",
+      "var storyName = \"${1:Story Name}\";",
+      "var storyVersion = \"${3:1.0}\";",
+      ""
+    ],
+    "description": "Story file header template"
+  }
+}

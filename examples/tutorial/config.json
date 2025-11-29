@@ -1,0 +1,25 @@
+{
+  "storyId": "tutorial-first-steps",
+  "version": "1.0.0",
+  "name": "First Steps Tutorial",
+  "author": "Storykee Team",
+  "description": "A beginner-friendly tutorial that teaches the basics of Storykee scripting",
+  "minecraftVersion": "1.21.10",
+  "dependencies": [],
+  "settings": {
+    "hotReload": true,
+    "debugMode": true,
+    "maxExecutionTimeMs": 5000,
+    "enableJavaSections": false
+  },
+  "permissions": {
+    "worldModification": false,
+    "playerModification": true,
+    "commandRegistration": false
+  },
+  "metadata": {
+    "difficulty": "beginner",
+    "estimatedPlaytime": "5-10 minutes",
+    "tags": ["tutorial", "beginner", "learning"]
+  }
+}

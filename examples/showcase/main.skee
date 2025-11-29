@@ -1,0 +1,725 @@
+// ============================================
+// Storykee Feature Showcase
+// ============================================
+// Эта история демонстрирует ВСЕ возможности мода:
+// 
+// 1. Переменные и типы данных
+// 2. Функции и управление потоком
+// 3. NPC система (спавн возле игрока!)
+// 4. Диалоги с ветвлениями
+// 5. Квесты с целями
+// 6. Боссы с фазами
+// 7. Кинематографические сцены
+// 8. HUD и GUI элементы
+// 9. Аудио система
+// 10. Таймеры и планировщик
+// 11. Модификация мира
+// 12. Частицы и эффекты
+// 13. Регионы и триггеры
+// 14. Голограммы
+// 15. Система партий
+// 16. Локализация
+// 17. Java секции
+// 18. Обработка событий
+
+// ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
+var storyName = "Storykee Showcase";
+var version = "1.0.0";
+var debugEnabled = true;
+
+// Демонстрация типов данных
+var numberExample = 42;
+var floatExample = 3.14159;
+var stringExample = "Привет, мир!";
+var booleanExample = true;
+var nullExample = null;
+var arrayExample = [1, 2, 3, "четыре", true];
+var objectExample = {
+    name: "Тестовый объект",
+    value: 100,
+    nested: {
+        deep: "вложенное значение"
+    }
+};
+
+// ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+
+// Функция для получения позиции рядом с игроком
+function getPositionNearPlayer(player, offsetX, offsetZ) {
+    var playerPos = getPlayerPosition(player);
+    if (playerPos == null) {
+        return { x: 0, y: 64, z: 0 };
+    }
+    return {
+        x: playerPos.x + offsetX,
+        y: playerPos.y,
+        z: playerPos.z + offsetZ
+    };
+}
+
+// Функция для логирования с отладкой
+function debugLog(message) {
+    if (debugEnabled) {
+        log("DEBUG", "[Showcase] " + message);
+    }
+}
+
+// Функция для отправки приветственного сообщения
+function sendWelcome(player) {
+    sendMessage(player, "§6═══════════════════════════════════════");
+    sendMessage(player, "§e    Добро пожаловать в Storykee Showcase!");
+    sendMessage(player, "§7    Демонстрация всех возможностей мода");
+    sendMessage(player, "§6═══════════════════════════════════════");
+}
+
+// Математические функции
+function calculateDistance(x1, y1, z1, x2, y2, z2) {
+    var dx = x2 - x1;
+    var dy = y2 - y1;
+    var dz = z2 - z1;
+    return sqrt(dx * dx + dy * dy + dz * dz);
+}
+
+function clamp(value, min, max) {
+    if (value < min) {
+        return min;
+    }
+    if (value > max) {
+        return max;
+    }
+    return value;
+}
+
+// ===== ОБРАБОТЧИКИ СОБЫТИЙ =====
+
+// Событие входа игрока - ГЛАВНАЯ ТОЧКА ВХОДА
+on playerJoin {
+    var player = event.player;
+    debugLog("Игрок присоединился: " + player);
+    
+    // Отправляем приветствие
+    sendWelcome(player);
+    
+    // Спавним NPC рядом с игроком через 3 секунды
+    scheduleDelayed(60, spawnShowcaseNPCs, player);
+    
+    // Показываем подсказку
+    scheduleDelayed(100, showInitialHint, player);
+    
+    // Проверяем, новый ли это игрок
+    var hasVisited = getPlayerVar(player, "hasVisitedShowcase");
+    if (hasVisited == null || hasVisited == false) {
+        setPlayerVar(player, "hasVisitedShowcase", true);
+        setPlayerVar(player, "showcaseProgress", 0);
+        
+        // Запускаем вступительную катсцену для новых игроков
+        scheduleDelayed(200, playIntroCutscene, player);
+    }
+}
+
+// Событие выхода игрока
+on playerLeave {
+    var player = event.player;
+    debugLog("Игрок вышел: " + player);
+    
+    // Сохраняем прогресс
+    savePlayerData(player);
+}
+
+// Событие взаимодействия с NPC
+on npcInteract {
+    var player = event.player;
+    var npcId = event.npc;
+    
+    debugLog("Взаимодействие с NPC: " + npcId);
+    
+    if (npcId == "guide_npc") {
+        showDialogue(player, "guideDialogue");
+    }
+    
+    if (npcId == "quest_giver") {
+        showDialogue(player, "questGiverDialogue");
+    }
+    
+    if (npcId == "merchant_npc") {
+        showDialogue(player, "merchantDialogue");
+    }
+    
+    if (npcId == "boss_summoner") {
+        showDialogue(player, "bossSummonerDialogue");
+    }
+}
+
+// Событие входа в регион
+on regionEnter {
+    var player = event.player;
+    var regionId = event.region;
+    
+    debugLog("Вход в регион: " + regionId);
+    
+    if (regionId == "showcase_arena") {
+        sendMessage(player, "§cВы вошли на арену!");
+        playSound(player, "minecraft:block.note_block.pling", 1.0, 1.5);
+    }
+    
+    if (regionId == "treasure_room") {
+        sendMessage(player, "§6Вы нашли сокровищницу!");
+        spawnTreasureParticles(player);
+    }
+}
+
+// Событие завершения квеста
+on questComplete {
+    var player = event.player;
+    var questId = event.quest;
+    
+    debugLog("Квест завершён: " + questId);
+    
+    if (questId == "showcase_tutorial") {
+        sendMessage(player, "§a§lПоздравляем! Вы завершили обучение!");
+        giveItem(player, "minecraft:diamond", 5);
+        addExperience(player, 100);
+        
+        // Обновляем прогресс
+        var progress = getPlayerVar(player, "showcaseProgress");
+        setPlayerVar(player, "showcaseProgress", progress + 1);
+    }
+}
+
+// ===== ФУНКЦИИ СПАВНА NPC =====
+
+// Спавн всех демонстрационных NPC рядом с игроком
+function spawnShowcaseNPCs(player) {
+    var pos = getPositionNearPlayer(player, 3, 0);
+    
+    // Гид - главный NPC
+    spawnNPC("guide_npc", pos.x, pos.y, pos.z + 2, {
+        name: "§6Гид Storykee",
+        invulnerable: true,
+        yaw: 180
+    });
+    
+    // Квестодатель
+    spawnNPC("quest_giver", pos.x + 3, pos.y, pos.z, {
+        name: "§eКвестодатель",
+        invulnerable: true,
+        yaw: 225
+    });
+    
+    // Торговец
+    spawnNPC("merchant_npc", pos.x - 3, pos.y, pos.z, {
+        name: "§aТорговец",
+        invulnerable: true,
+        yaw: 135
+    });
+    
+    // NPC который ходит за игроком
+    spawnNPC("follower_npc", pos.x + 5, pos.y, pos.z + 5, {
+        name: "§dСпутник",
+        invulnerable: true
+    });
+    // Запускаем следование через секунду
+    scheduleDelayed(20, startFollowing, player);
+    
+    // NPC который просто бродит
+    spawnNPC("wanderer_npc", pos.x - 5, pos.y, pos.z + 5, {
+        name: "§7Странник",
+        invulnerable: true
+    });
+    // Запускаем блуждание через секунду
+    scheduleDelayed(20, startWandering);
+    
+    // Призыватель боссов
+    spawnNPC("boss_summoner", pos.x, pos.y, pos.z - 3, {
+        name: "§cПризыватель",
+        skin: "summoner_skin",
+        invulnerable: true,
+        yaw: 0
+    });
+    
+    // Создаём голограмму над гидом
+    createHologram("guide_hologram", pos.x, pos.y + 2.5, pos.z + 2, [
+        "§6§lStorykee Showcase",
+        "§7Нажмите ПКМ для начала"
+    ]);
+    
+    debugLog("NPC заспавнены рядом с игроком");
+    sendMessage(player, "§7NPC появились рядом с вами!");
+}
+
+function showInitialHint(player) {
+    showTitle(player, "§6Storykee", "§7Подойдите к Гиду", 10, 60, 20);
+}
+
+// Запуск следования NPC за игроком
+function startFollowing(player) {
+    followPlayer("follower_npc", player, 3.0, 1.0);
+    sendMessage(player, "§dСпутник теперь следует за вами!");
+}
+
+// Запуск блуждания NPC
+function startWandering() {
+    wander("wanderer_npc", 10.0);
+}
+
+// ===== ДИАЛОГИ =====
+
+dialogue guideDialogue {
+    speaker: "Гид Storykee";
+    
+    node start {
+        text: "§eДобро пожаловать в демонстрацию Storykee!";
+        text: "§7Я покажу вам все возможности этого мода.";
+        choices: [
+            { text: "Расскажи о возможностях", next: "features" },
+            { text: "Начать обучение", next: "startTutorial" },
+            { text: "Показать эффекты", next: "showEffects" },
+            { text: "До свидания", next: "goodbye" }
+        ];
+    }
+    
+    node features {
+        text: "§eStorykee позволяет создавать:";
+        text: "§7• NPC с диалогами и ветвлениями";
+        text: "§7• Квесты с целями и наградами";
+        text: "§7• Боссов с фазами и способностями";
+        text: "§7• Кинематографические сцены";
+        text: "§7• HUD элементы и GUI";
+        text: "§7• И многое другое!";
+        next: "start";
+    }
+    
+    node startTutorial {
+        text: "§aОтлично! Давайте начнём обучение.";
+        text: "§7Поговорите с Квестодателем справа от меня.";
+        action: startQuest(player, "showcase_tutorial");
+        action: updateObjective(player, "showcase_tutorial", "talk_to_guide", 1);
+    }
+    
+    node showEffects {
+        text: "§dСмотрите на эти эффекты!";
+        action: demonstrateEffects(player);
+    }
+    
+    node goodbye {
+        text: "§7До встречи, путешественник!";
+    }
+}
+
+dialogue questGiverDialogue {
+    speaker: "Квестодатель";
+    
+    node start {
+        text: "§eПриветствую, искатель приключений!";
+        text: "§7У меня есть задание для тебя.";
+        choices: [
+            { text: "Какое задание?", next: "explainQuest" },
+            { text: "Покажи мои квесты", next: "showQuests" },
+            { text: "Не сейчас", next: "decline" }
+        ];
+    }
+    
+    node explainQuest {
+        text: "§eТебе нужно:";
+        text: "§71. Поговорить с Гидом";
+        text: "§72. Посетить арену";
+        text: "§73. Собрать 3 алмаза";
+        text: "§7Награда: опыт и редкие предметы!";
+        choices: [
+            { text: "Принять задание", next: "acceptQuest" },
+            { text: "Подумаю", next: "decline" }
+        ];
+    }
+    
+    node acceptQuest {
+        text: "§aОтлично! Удачи тебе!";
+        action: startQuest(player, "showcase_tutorial");
+    }
+    
+    node showQuests {
+        text: "§7Твои активные квесты:";
+        action: showActiveQuests(player);
+        next: "start";
+    }
+    
+    node decline {
+        text: "§7Возвращайся, когда будешь готов.";
+    }
+}
+
+dialogue merchantDialogue {
+    speaker: "Торговец";
+    
+    node start {
+        text: "§aДобро пожаловать в мою лавку!";
+        text: "§7Хотите что-нибудь купить?";
+        choices: [
+            { text: "Показать товары", next: "showGoods" },
+            { text: "Продать предметы", next: "sellItems" },
+            { text: "Уйти", next: "leave" }
+        ];
+    }
+    
+    node showGoods {
+        text: "§eУ меня есть:";
+        text: "§7• Зелья здоровья - 10 изумрудов";
+        text: "§7• Зачарованный меч - 50 изумрудов";
+        text: "§7• Карта сокровищ - 25 изумрудов";
+        next: "start";
+    }
+    
+    node sellItems {
+        text: "§7Покажите, что у вас есть...";
+        action: openTradeGUI(player);
+    }
+    
+    node leave {
+        text: "§aПриходите ещё!";
+    }
+}
+
+dialogue bossSummonerDialogue {
+    speaker: "Призыватель";
+    
+    node start {
+        text: "§cЯ могу призвать могущественных боссов...";
+        text: "§7Но будьте осторожны!";
+        choices: [
+            { text: "Призвать тренировочного босса", next: "summonTraining" },
+            { text: "Призвать настоящего босса", next: "summonReal" },
+            { text: "Расскажи о боссах", next: "explainBosses" },
+            { text: "Уйти", next: "leave" }
+        ];
+    }
+    
+    node summonTraining {
+        text: "§eПризываю тренировочного босса!";
+        action: spawnTrainingBoss(player);
+    }
+    
+    node summonReal {
+        text: "§c§lВы уверены? Это опасно!";
+        choices: [
+            { text: "Да, я готов!", next: "confirmBoss" },
+            { text: "Нет, передумал", next: "start" }
+        ];
+    }
+    
+    node confirmBoss {
+        text: "§4Да будет так!";
+        action: spawnShowcaseBoss(player);
+    }
+    
+    node explainBosses {
+        text: "§7Боссы в Storykee имеют:";
+        text: "§7• Несколько фаз с разными способностями";
+        text: "§7• Полоску здоровья";
+        text: "§7• Уникальные атаки";
+        text: "§7• Награды за победу";
+        next: "start";
+    }
+    
+    node leave {
+        text: "§7Возвращайтесь, когда будете готовы к испытанию.";
+    }
+}
+
+// ===== КВЕСТЫ =====
+
+quest showcase_tutorial {
+    title: "Знакомство со Storykee";
+    description: "Изучите основные возможности мода Storykee";
+    
+    objectives: [
+        {
+            id: "talk_to_guide";
+            description: "Поговорить с Гидом";
+            type: "interact_npc";
+            target: "guide_npc";
+            count: 1;
+        },
+        {
+            id: "visit_arena";
+            description: "Посетить арену";
+            type: "reach_location";
+            region: "showcase_arena";
+            count: 1;
+        },
+        {
+            id: "collect_diamonds";
+            description: "Собрать алмазы";
+            type: "collect_item";
+            target: "minecraft:diamond";
+            count: 3;
+        }
+    ];
+    
+    rewards: {
+        experience: 500;
+        items: [
+            { item: "minecraft:diamond_sword", count: 1 },
+            { item: "minecraft:golden_apple", count: 5 }
+        ];
+    };
+    
+    onComplete: onTutorialComplete;
+}
+
+// ===== ФУНКЦИИ ЭФФЕКТОВ =====
+
+function demonstrateEffects(player) {
+    var pos = getPlayerPosition(player);
+    
+    // Частицы
+    spawnParticles("minecraft:end_rod", pos.x, pos.y + 1, pos.z, 50, 2.0);
+    
+    // Звук
+    playSound(player, "minecraft:entity.player.levelup", 1.0, 1.0);
+    
+    // Эффект на игрока
+    applyEffect(player, "minecraft:glowing", 100, 0);
+    
+    // Сообщение
+    sendMessage(player, "§d✨ Эффекты активированы!");
+    
+    // Запланированные эффекты
+    scheduleDelayed(20, spawnFireworkEffect, pos);
+    scheduleDelayed(40, spawnFireworkEffect, pos);
+    scheduleDelayed(60, spawnFireworkEffect, pos);
+}
+
+function spawnFireworkEffect(pos) {
+    spawnFirework(pos.x, pos.y, pos.z, {
+        colors: ["red", "gold", "white"],
+        fadeColors: ["orange"],
+        type: "star",
+        trail: true,
+        flicker: true
+    });
+}
+
+function spawnTreasureParticles(player) {
+    var pos = getPlayerPosition(player);
+    
+    for (var i = 0; i < 5; i = i + 1) {
+        var delay = i * 10;
+        scheduleDelayed(delay, spawnGoldParticles, pos);
+    }
+}
+
+function spawnGoldParticles(pos) {
+    spawnParticles("minecraft:happy_villager", pos.x, pos.y + 0.5, pos.z, 20, 1.5);
+}
+
+// ===== БОССЫ =====
+
+function spawnTrainingBoss(player) {
+    var pos = getPositionNearPlayer(player, 0, 10);
+    
+    var bossId = spawnBoss("training_boss", {
+        name: "§eTренировочный Голем",
+        entityType: "minecraft:iron_golem",
+        health: 50,
+        damage: 5,
+        position: vec3(pos.x, pos.y, pos.z),
+        phases: [
+            {
+                healthThreshold: 1.0,
+                abilities: ["slam"]
+            },
+            {
+                healthThreshold: 0.5,
+                abilities: ["slam", "spin"]
+            }
+        ]
+    });
+    
+    showBossBar(player, bossId, "Тренировочный Голем", "yellow");
+    sendMessage(player, "§e⚔ Тренировочный босс призван!");
+}
+
+function spawnShowcaseBoss(player) {
+    var pos = getPositionNearPlayer(player, 0, 15);
+    
+    // Драматическая подготовка
+    playSound(player, "minecraft:entity.wither.spawn", 1.0, 0.5);
+    shakeScreen(player, 1.0, 2000);
+    
+    scheduleDelayed(40, actuallySpawnBoss, player, pos);
+}
+
+function actuallySpawnBoss(player, pos) {
+    var bossId = spawnBoss("showcase_boss", {
+        name: "§c§lТёмный Страж",
+        entityType: "minecraft:wither_skeleton",
+        health: 200,
+        damage: 15,
+        position: vec3(pos.x, pos.y, pos.z),
+        phases: [
+            {
+                healthThreshold: 1.0,
+                name: "Пробуждение",
+                abilities: ["strike", "summon"]
+            },
+            {
+                healthThreshold: 0.5,
+                name: "Ярость",
+                abilities: ["strike", "summon", "aoe"],
+                onEnter: bossPhase2Cutscene
+            },
+            {
+                healthThreshold: 0.25,
+                name: "Отчаяние",
+                abilities: ["strike", "summon", "aoe", "ultimate"]
+            }
+        ]
+    });
+    
+    showBossBar(player, bossId, "Тёмный Страж", "red");
+    playMusic(player, "boss_battle", true, 2.0);
+    sendMessage(player, "§c§l⚔ ТЁМНЫЙ СТРАЖ ПРОБУДИЛСЯ!");
+}
+
+function bossPhase2Cutscene(player) {
+    sendMessage(player, "§4Босс переходит во вторую фазу!");
+    shakeScreen(player, 0.5, 1000);
+    
+    var pos = getPlayerPosition(player);
+    spawnParticles("minecraft:soul_fire_flame", pos.x, pos.y, pos.z, 100, 5.0);
+}
+
+// ===== КАТСЦЕНЫ =====
+
+function playIntroCutscene(player) {
+    var pos = getPlayerPosition(player);
+    
+    startCutscene(player, {
+        disableMovement: true,
+        hideHUD: false,
+        waypoints: [
+            { 
+                position: vec3(pos.x, pos.y + 20, pos.z - 20), 
+                lookAt: vec3(pos.x, pos.y, pos.z), 
+                duration: 3000 
+            },
+            { 
+                position: vec3(pos.x + 10, pos.y + 10, pos.z), 
+                lookAt: vec3(pos.x, pos.y, pos.z), 
+                duration: 2000 
+            },
+            { 
+                position: vec3(pos.x, pos.y + 2, pos.z - 5), 
+                lookAt: vec3(pos.x, pos.y + 1, pos.z), 
+                duration: 2000 
+            }
+        ],
+        onComplete: endIntroCutscene
+    });
+    
+    // Текст во время катсцены
+    scheduleDelayed(20, showCutsceneText1, player);
+    scheduleDelayed(80, showCutsceneText2, player);
+    scheduleDelayed(120, showCutsceneText3, player);
+}
+
+function showCutsceneText1(player) {
+    showTitle(player, "§6Storykee", "", 10, 40, 10);
+}
+
+function showCutsceneText2(player) {
+    showTitle(player, "", "§7Создавайте истории", 10, 40, 10);
+}
+
+function showCutsceneText3(player) {
+    showTitle(player, "", "§eВаше приключение начинается", 10, 40, 10);
+}
+
+function endIntroCutscene(player) {
+    sendMessage(player, "§aКатсцена завершена! Подойдите к NPC.");
+}
+
+// ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+
+function showActiveQuests(player) {
+    var quests = getActiveQuests(player);
+    
+    if (quests.length == 0) {
+        sendMessage(player, "§7У вас нет активных квестов.");
+    } else {
+        for quest in quests {
+            sendMessage(player, "§e• " + quest);
+        }
+    }
+}
+
+function onTutorialComplete(player) {
+    sendMessage(player, "§a§l★ ОБУЧЕНИЕ ЗАВЕРШЕНО! ★");
+    
+    // Фейерверки в честь завершения
+    var pos = getPlayerPosition(player);
+    for (var i = 0; i < 5; i = i + 1) {
+        var offsetX = random(-5, 5);
+        var offsetZ = random(-5, 5);
+        scheduleDelayed(i * 20, spawnFireworkEffect, {
+            x: pos.x + offsetX,
+            y: pos.y,
+            z: pos.z + offsetZ
+        });
+    }
+}
+
+function savePlayerData(player) {
+    // Данные автоматически сохраняются системой
+    debugLog("Данные игрока сохранены");
+}
+
+function openTradeGUI(player) {
+    // Открываем GUI торговли
+    openGUI(player, "trade_gui");
+}
+
+// ===== JAVA СЕКЦИЯ =====
+// Демонстрация встроенного Java кода
+
+#java-section-start
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.network.chat.Component;
+
+public class ShowcaseJavaFeatures {
+    
+    // Применение мощного баффа
+    public static void applyHeroBuff(ServerPlayer player) {
+        player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 1200, 1));
+        player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 1200, 1));
+        player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 1200, 0));
+        player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 1200, 1));
+        
+        player.sendSystemMessage(Component.literal("§d✨ Героический бафф активирован!"));
+    }
+    
+    // Создание молнии для эффекта
+    public static void strikeVisualLightning(ServerPlayer player, double x, double y, double z) {
+        var world = player.serverLevel();
+        var lightning = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(world);
+        if (lightning != null) {
+            lightning.moveTo(x, y, z);
+            lightning.setVisualOnly(true);
+            world.addFreshEntity(lightning);
+        }
+    }
+    
+    // Расчёт урона с модификаторами
+    public static int calculateModifiedDamage(int baseDamage, int playerLevel, boolean isCritical) {
+        int damage = baseDamage + (playerLevel * 2);
+        if (isCritical) {
+            damage = (int)(damage * 1.5);
+        }
+        return damage;
+    }
+}
+#java-section-end
+
+// ===== КОНЕЦ СКРИПТА =====
+// Этот скрипт демонстрирует все основные возможности Storykee

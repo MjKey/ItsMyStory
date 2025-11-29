@@ -1,0 +1,52 @@
+{
+  "storyId": "the-lost-artifact",
+  "version": "1.0.0",
+  "name": "The Lost Artifact",
+  "author": "Storykee Team",
+  "description": "An epic adventure to restore the Celestial Orb and defeat the Shadow Lord. Demonstrates advanced Storykee features including boss battles, cutscenes, and complex quest chains.",
+  "minecraftVersion": "1.21.10",
+  "dependencies": [],
+  "settings": {
+    "hotReload": true,
+    "debugMode": false,
+    "maxExecutionTimeMs": 10000,
+    "enableJavaSections": true
+  },
+  "permissions": {
+    "worldModification": true,
+    "playerModification": true,
+    "commandRegistration": true
+  },
+  "metadata": {
+    "difficulty": "advanced",
+    "estimatedPlaytime": "2-4 hours",
+    "tags": ["adventure", "boss-battles", "quests", "cutscenes", "advanced"],
+    "features": [
+      "Complex quest chains with prerequisites",
+      "Multi-phase boss encounters",
+      "Cinematic cutscenes",
+      "World modifications",
+      "Particle effects and audio",
+      "Player variable persistence",
+      "Java section integration"
+    ]
+  },
+  "regions": {
+    "mine_entrance": {
+      "min": [195, 60, -5],
+      "max": [205, 70, 5]
+    },
+    "guardian_chamber": {
+      "min": [195, 25, -10],
+      "max": [210, 40, 10]
+    },
+    "sunken_temple": {
+      "min": [-100, 30, -100],
+      "max": [-50, 60, -50]
+    },
+    "shadow_realm_entrance": {
+      "min": [-10, 95, -10],
+      "max": [10, 110, 10]
+    }
+  }
+}

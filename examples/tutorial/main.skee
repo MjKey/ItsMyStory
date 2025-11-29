@@ -1,0 +1,165 @@
+// ============================================
+// Storykee Tutorial Story - "First Steps"
+// ============================================
+// This tutorial demonstrates basic Storykee features:
+// - Variables and basic operations
+// - NPC creation and interaction
+// - Simple dialogues
+// - Basic quests
+// - Event handling
+
+// ===== VARIABLES =====
+// Variables store data that can be used throughout your story
+var storyName = "First Steps Tutorial";
+var tutorialVersion = "1.0";
+var welcomeMessage = "Welcome to the Storykee tutorial!";
+
+// ===== NPC DEFINITIONS =====
+// NPCs are characters that players can interact with
+
+npc guide {
+    name: "Tutorial Guide";
+    skin: "guide_skin";
+    position: vec3(100, 64, 100);
+    invulnerable: true;
+}
+
+npc merchant {
+    name: "Village Merchant";
+    skin: "merchant_skin";
+    position: vec3(110, 64, 105);
+    invulnerable: true;
+}
+
+// ===== DIALOGUE DEFINITIONS =====
+// Dialogues create conversations between players and NPCs
+
+dialogue guideWelcome {
+    speaker: "Tutorial Guide";
+    
+    node start {
+        text: "Hello, adventurer! Welcome to the world of Storykee.";
+        text: "I'm here to help you learn the basics.";
+        choices: [
+            { text: "Tell me about quests", next: "aboutQuests" },
+            { text: "How do I talk to NPCs?", next: "aboutNPCs" },
+            { text: "I'm ready to start!", next: "startTutorial" }
+        ];
+    }
+    
+    node aboutQuests {
+        text: "Quests are tasks you can complete for rewards.";
+        text: "You'll see objectives on your screen as you progress.";
+        next: "start";
+    }
+    
+    node aboutNPCs {
+        text: "Simply right-click on any NPC to interact with them.";
+        text: "Each NPC may have different things to say or offer.";
+        next: "start";
+    }
+    
+    node startTutorial {
+        text: "Excellent! Let me give you your first quest.";
+        text: "Go talk to the Village Merchant nearby.";
+        action: startQuest(player, "talkToMerchant");
+    }
+}
+
+dialogue merchantGreeting {
+    speaker: "Village Merchant";
+    
+    node start {
+        text: "Ah, a new face! The Guide sent you, didn't he?";
+        choices: [
+            { text: "Yes, I'm learning the ropes.", next: "learning" },
+            { text: "What do you sell?", next: "shop" }
+        ];
+    }
+    
+    node learning {
+        text: "Well, you've completed your first objective!";
+        text: "Here's a small reward for your efforts.";
+        action: completeQuest(player, "talkToMerchant");
+        action: giveItem(player, "minecraft:apple", 5);
+    }
+    
+    node shop {
+        text: "I have many wares, but first complete your training!";
+        next: "start";
+    }
+}
+
+// ===== QUEST DEFINITIONS =====
+// Quests give players goals and track their progress
+
+quest talkToMerchant {
+    title: "Meet the Merchant";
+    description: "The Tutorial Guide wants you to meet the Village Merchant.";
+    
+    objectives: [
+        {
+            id: "findMerchant";
+            description: "Talk to the Village Merchant";
+            type: "interact_npc";
+            target: "merchant";
+            count: 1;
+        }
+    ];
+    
+    rewards: {
+        experience: 10;
+        items: [
+            { item: "minecraft:emerald", count: 1 }
+        ];
+    };
+}
+
+// ===== EVENT HANDLERS =====
+// Events let your story respond to player actions
+
+on playerJoin {
+    // Welcome new players
+    print("Player joined: " + event.player);
+    
+    // Show welcome message
+    var player = event.player;
+    sendMessage(player, welcomeMessage);
+    sendMessage(player, "Right-click the Tutorial Guide to begin!");
+}
+
+on npcInteract {
+    var npcName = event.npc;
+    var player = event.player;
+    
+    if (npcName == "guide") {
+        showDialogue(player, "guideWelcome");
+    }
+    
+    if (npcName == "merchant") {
+        showDialogue(player, "merchantGreeting");
+    }
+}
+
+on questComplete {
+    var questId = event.quest;
+    var player = event.player;
+    
+    if (questId == "talkToMerchant") {
+        sendMessage(player, "Congratulations! You completed the tutorial!");
+        sendMessage(player, "You're now ready to explore more advanced features.");
+    }
+}
+
+// ===== UTILITY FUNCTIONS =====
+// You can define your own functions for reusable logic
+
+function sendMessage(player, message) {
+    // This would send a chat message to the player
+    print("Message to " + player + ": " + message);
+}
+
+function giveReward(player, itemId, amount) {
+    giveItem(player, itemId, amount);
+    print("Gave " + amount + "x " + itemId + " to " + player);
+}

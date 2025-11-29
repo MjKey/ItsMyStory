@@ -1,6 +1,7 @@
 plugins {
 	id 'fabric-loom' version "${loom_version}"
 	id 'maven-publish'
+	id 'antlr'
 }
 
 version = project.mod_version
@@ -16,6 +17,7 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+	mavenCentral()
 }
 
 loom {
@@ -45,6 +47,17 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
+	// ANTLR for parser generation
+	antlr "org.antlr:antlr4:${project.antlr_version}"
+	implementation "org.antlr:antlr4-runtime:${project.antlr_version}"
+	
+	// JSON processing for serialization
+	implementation "com.google.code.gson:gson:${project.gson_version}"
+	
+	// Property-based testing with jqwik
+	testImplementation "net.jqwik:jqwik:${project.jqwik_version}"
+	testImplementation "org.junit.jupiter:junit-jupiter:${project.junit_version}"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
 
 processResources {
@@ -57,6 +70,7 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
 	it.options.release = 21
+	it.options.compilerArgs += ['-Xlint:deprecation']
 }
 
 java {
@@ -67,6 +81,42 @@ java {
 
 	sourceCompatibility = JavaVersion.VERSION_21
 	targetCompatibility = JavaVersion.VERSION_21
+}
+
+// ANTLR configuration
+generateGrammarSource {
+	maxHeapSize = "64m"
+	arguments += ["-visitor", "-listener", "-package", "ru.mjkey.storykee.parser.generated"]
+	outputDirectory = file("${project.buildDir}/generated-src/antlr/main/ru/mjkey/storykee/parser/generated")
+}
+
+// Add generated ANTLR sources to main source set
+sourceSets {
+	main {
+		java {
+			srcDir "${project.buildDir}/generated-src/antlr/main"
+		}
+	}
+}
+
+// Handle duplicate files in jar tasks
+tasks.withType(Jar).configureEach {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// Ensure ANTLR generation runs before compilation
+compileJava.dependsOn generateGrammarSource
+
+// Test configuration
+test {
+	useJUnitPlatform {
+		includeEngines 'jqwik', 'junit-jupiter'
+	}
+	
+	testLogging {
+		events "passed", "skipped", "failed"
+		showStandardStreams = true
+	}
 }
 
 jar {

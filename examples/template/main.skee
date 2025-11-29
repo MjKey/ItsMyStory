@@ -1,0 +1,230 @@
+// ============================================
+// Storykee Story Template
+// ============================================
+// Use this template as a starting point for your own stories.
+// Replace the placeholder content with your own creative ideas!
+//
+// Quick Start:
+// 1. Copy this folder to .minecraft/itsmystory/scripts/your_story_name/
+// 2. Edit config.json with your story details
+// 3. Modify this file with your NPCs, dialogues, and quests
+// 4. Test in-game with hot reload enabled
+
+// ===== STORY VARIABLES =====
+// Define global variables for your story here
+var storyName = "My Story";
+var storyVersion = "1.0";
+
+// ===== NPC DEFINITIONS =====
+// Create your characters here
+// Syntax: npc identifier { properties }
+
+npc myNPC {
+    name: "Character Name";
+    skin: "skin_name";                    // Skin file in assets/textures/
+    position: vec3(0, 64, 0);             // X, Y, Z coordinates
+    dimension: "minecraft:overworld";      // Optional: dimension
+    invulnerable: true;                   // Optional: can't be damaged
+}
+
+// Add more NPCs as needed:
+// npc anotherNPC {
+//     name: "Another Character";
+//     skin: "another_skin";
+//     position: vec3(10, 64, 10);
+// }
+
+// ===== DIALOGUE DEFINITIONS =====
+// Create conversations for your NPCs
+// Syntax: dialogue identifier { nodes }
+
+dialogue myDialogue {
+    speaker: "Character Name";
+    
+    // Starting node (required)
+    node start {
+        text: "Hello! This is the first line of dialogue.";
+        text: "You can have multiple lines.";
+        
+        // Option 1: Choices for the player
+        choices: [
+            { text: "First choice", next: "response1" },
+            { text: "Second choice", next: "response2" },
+            { text: "Goodbye", next: "goodbye" }
+        ];
+        
+        // Option 2: Auto-advance to next node
+        // next: "nextNode";
+        
+        // Option 3: Execute action and end
+        // action: someFunction(player);
+    }
+    
+    node response1 {
+        text: "You chose the first option!";
+        next: "start";  // Go back to start
+    }
+    
+    node response2 {
+        text: "You chose the second option!";
+        action: giveItem(player, "minecraft:diamond", 1);
+        next: "goodbye";
+    }
+    
+    node goodbye {
+        text: "Farewell, adventurer!";
+        // No next = dialogue ends
+    }
+}
+
+// ===== QUEST DEFINITIONS =====
+// Create quests with objectives and rewards
+// Syntax: quest identifier { properties }
+
+quest myQuest {
+    title: "Quest Title";
+    description: "A brief description of what the player needs to do.";
+    
+    // Optional: quests that must be completed first
+    // prerequisites: ["previousQuest"];
+    
+    objectives: [
+        {
+            id: "objective1";
+            description: "Talk to the NPC";
+            type: "interact_npc";      // Types: interact_npc, kill_entity, collect_item, reach_location, custom
+            target: "myNPC";
+            count: 1;
+        },
+        {
+            id: "objective2";
+            description: "Collect 5 diamonds";
+            type: "collect_item";
+            target: "minecraft:diamond";
+            count: 5;
+        }
+    ];
+    
+    rewards: {
+        experience: 100;
+        items: [
+            { item: "minecraft:emerald", count: 10 }
+        ];
+    };
+    
+    // Optional: function to call when quest completes
+    // onComplete: myQuestCompleteHandler;
+}
+
+// ===== EVENT HANDLERS =====
+// Respond to game events
+// Syntax: on eventType { actions }
+
+// Player joins the game
+on playerJoin {
+    var player = event.player;
+    print("Player joined: " + player);
+    
+    // Welcome message
+    sendMessage(player, "Welcome to " + storyName + "!");
+    
+    // Start initial quest (optional)
+    // startQuest(player, "myQuest");
+}
+
+// Player interacts with an NPC
+on npcInteract {
+    var npcName = event.npc;
+    var player = event.player;
+    
+    if (npcName == "myNPC") {
+        showDialogue(player, "myDialogue");
+    }
+    
+    // Add more NPC interactions here
+}
+
+// Player enters a region
+on regionEnter {
+    var regionId = event.region;
+    var player = event.player;
+    
+    if (regionId == "myRegion") {
+        sendMessage(player, "You entered a special area!");
+    }
+}
+
+// Player completes a quest
+on questComplete {
+    var questId = event.quest;
+    var player = event.player;
+    
+    if (questId == "myQuest") {
+        sendMessage(player, "Congratulations on completing the quest!");
+        // Start next quest, give bonus rewards, etc.
+    }
+}
+
+// ===== CUSTOM FUNCTIONS =====
+// Define reusable functions for your story
+
+function sendMessage(player, message) {
+    // Send a chat message to the player
+    print("Message to " + player + ": " + message);
+}
+
+function giveReward(player, itemId, amount) {
+    giveItem(player, itemId, amount);
+    sendMessage(player, "You received " + amount + "x " + itemId + "!");
+}
+
+// Timer example
+function startCountdown(player, seconds) {
+    var remaining = seconds;
+    
+    var timerId = scheduleRepeating(1000, updateCountdown);
+    
+    // Store timer ID for later cancellation if needed
+    setPlayerVar(player, "countdownTimer", timerId);
+}
+
+// ===== ADVANCED FEATURES (Optional) =====
+
+// Spawn a boss
+// function spawnMyBoss(player) {
+//     var bossId = spawnBoss("my_boss", {
+//         name: "Boss Name",
+//         entityType: "minecraft:zombie",
+//         health: 100,
+//         damage: 10,
+//         position: vec3(0, 64, 0),
+//         phases: [
+//             { healthThreshold: 1.0, abilities: ["attack"] },
+//             { healthThreshold: 0.5, abilities: ["attack", "special"] }
+//         ]
+//     });
+//     showBossBar(player, bossId, "Boss Name", "red");
+//     return bossId;
+// }
+
+// Start a cutscene
+// function myIntro(player) {
+//     startCutscene(player, {
+//         disableMovement: true,
+//         waypoints: [
+//             { position: vec3(0, 80, -20), lookAt: vec3(0, 64, 0), duration: 3000 }
+//         ],
+//         onComplete: endIntro
+//     });
+// }
+
+// Java section for advanced functionality
+// #java-section-start
+// import net.minecraft.server.level.ServerPlayer;
+// 
+// public class MyAdvancedFeature {
+//     public static void doSomething(ServerPlayer player) {
+//         // Advanced Java code here
+//     }
+// }
+// #java-section-end

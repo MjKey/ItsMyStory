@@ -1,0 +1,648 @@
+// ============================================
+// Storykee Advanced Story - "The Lost Artifact"
+// ============================================
+// This advanced example demonstrates:
+// - Complex quest chains with prerequisites
+// - Branching dialogues with conditions
+// - Boss encounters with phases
+// - Cinematic cutscenes
+// - World modifications
+// - Particle effects and audio
+// - Timer-based events
+// - Java section integration
+// - Player variables and persistence
+
+// ===== STORY CONFIGURATION =====
+var storyTitle = "The Lost Artifact";
+var storyVersion = "1.0";
+var debugMode = false;
+
+// ===== PLAYER VARIABLES =====
+// These persist between sessions
+// playerVar reputation = 0;
+// playerVar artifactPieces = 0;
+// playerVar hasMetOracle = false;
+
+// ===== NPC DEFINITIONS =====
+
+npc oracle {
+    name: "The Oracle";
+    skin: "oracle_skin";
+    position: vec3(0, 70, 0);
+    dimension: "minecraft:overworld";
+    invulnerable: true;
+}
+
+npc blacksmith {
+    name: "Master Blacksmith";
+    skin: "blacksmith_skin";
+    position: vec3(50, 64, 30);
+    invulnerable: true;
+}
+
+npc villageElder {
+    name: "Village Elder";
+    skin: "elder_skin";
+    position: vec3(-20, 64, 15);
+    invulnerable: true;
+}
+
+npc mysteriousStranger {
+    name: "Mysterious Stranger";
+    skin: "stranger_skin";
+    position: vec3(100, 64, -50);
+    invulnerable: true;
+}
+
+// ===== COMPLEX DIALOGUES =====
+
+dialogue oracleFirstMeeting {
+    speaker: "The Oracle";
+    
+    node start {
+        text: "I have been expecting you, traveler.";
+        text: "The ancient artifact has been shattered, its pieces scattered across the land.";
+        choices: [
+            { text: "What artifact?", next: "explainArtifact" },
+            { text: "Why should I care?", next: "motivation" },
+            { text: "I'll help you.", next: "acceptMission" }
+        ];
+    }
+    
+    node explainArtifact {
+        text: "The Celestial Orb - a relic of immense power.";
+        text: "It once protected this realm from the Shadow Lord.";
+        text: "Without it, darkness will consume everything.";
+        next: "askHelp";
+    }
+    
+    node motivation {
+        text: "Because if you don't, there won't be a world left to live in.";
+        text: "The Shadow Lord grows stronger each day.";
+        next: "askHelp";
+    }
+    
+    node askHelp {
+        text: "Will you help restore the artifact?";
+        choices: [
+            { text: "Yes, I'll do it.", next: "acceptMission" },
+            { text: "I need to think about it.", next: "decline" }
+        ];
+    }
+    
+    node acceptMission {
+        text: "Excellent. There are three pieces to find.";
+        text: "The Blacksmith knows the location of the first piece.";
+        text: "Seek him out in the village.";
+        action: setPlayerVar(player, "hasMetOracle", true);
+        action: startQuest(player, "findFirstPiece");
+        action: addReputation(player, 10);
+    }
+    
+    node decline {
+        text: "Very well. But know that time is running out.";
+        text: "Return when you are ready to face your destiny.";
+    }
+}
+
+dialogue blacksmithQuest {
+    speaker: "Master Blacksmith";
+    
+    node start {
+        // Check if player has met the oracle
+        condition: getPlayerVar(player, "hasMetOracle") == true;
+        text: "Ah, the Oracle sent you? About time someone came.";
+        text: "I know where the first artifact piece lies.";
+        next: "giveLocation";
+        
+        // Fallback if condition not met
+        fallback: "notReady";
+    }
+    
+    node notReady {
+        text: "I'm busy with my work. Come back later.";
+    }
+    
+    node giveLocation {
+        text: "Deep in the Abandoned Mine, there's a hidden chamber.";
+        text: "But beware - the mine is infested with creatures.";
+        text: "Take this enchanted pickaxe. You'll need it.";
+        action: giveItem(player, "minecraft:diamond_pickaxe", 1);
+        action: updateObjective(player, "findFirstPiece", "talkToBlacksmith", 1);
+        choices: [
+            { text: "Where is the mine?", next: "mineLocation" },
+            { text: "What creatures?", next: "creatures" },
+            { text: "I'm ready. Let's go!", next: "ready" }
+        ];
+    }
+    
+    node mineLocation {
+        text: "Head east from the village, past the old oak tree.";
+        text: "You'll see the mine entrance at the base of the mountain.";
+        action: createWaypoint(player, "mine_entrance", 200, 64, 0);
+        next: "ready";
+    }
+    
+    node creatures {
+        text: "Spiders, zombies, and worse things lurk in the darkness.";
+        text: "Some say a guardian protects the artifact piece.";
+        next: "ready";
+    }
+    
+    node ready {
+        text: "Good luck, adventurer. May the light guide you.";
+    }
+}
+
+// ===== QUEST DEFINITIONS =====
+
+quest findFirstPiece {
+    title: "The First Fragment";
+    description: "Find the first piece of the Celestial Orb in the Abandoned Mine.";
+    
+    objectives: [
+        {
+            id: "talkToBlacksmith";
+            description: "Speak with the Master Blacksmith";
+            type: "interact_npc";
+            target: "blacksmith";
+            count: 1;
+        },
+        {
+            id: "enterMine";
+            description: "Enter the Abandoned Mine";
+            type: "reach_location";
+            region: "mine_entrance";
+            count: 1;
+        },
+        {
+            id: "defeatGuardian";
+            description: "Defeat the Mine Guardian";
+            type: "kill_entity";
+            target: "mine_guardian";
+            count: 1;
+        },
+        {
+            id: "collectFragment";
+            description: "Collect the Artifact Fragment";
+            type: "collect_item";
+            target: "artifact_fragment_1";
+            count: 1;
+        }
+    ];
+    
+    rewards: {
+        experience: 500;
+        items: [
+            { item: "minecraft:diamond", count: 5 },
+            { item: "minecraft:gold_ingot", count: 10 }
+        ];
+    };
+    
+    onComplete: onFirstPieceFound;
+}
+
+quest findSecondPiece {
+    title: "The Second Fragment";
+    description: "Retrieve the second piece from the Sunken Temple.";
+    prerequisites: ["findFirstPiece"];
+    
+    objectives: [
+        {
+            id: "findTemple";
+            description: "Locate the Sunken Temple";
+            type: "reach_location";
+            region: "sunken_temple";
+            count: 1;
+        },
+        {
+            id: "solvePuzzle";
+            description: "Solve the Temple Puzzle";
+            type: "custom";
+            count: 1;
+        },
+        {
+            id: "collectFragment";
+            description: "Collect the Artifact Fragment";
+            type: "collect_item";
+            target: "artifact_fragment_2";
+            count: 1;
+        }
+    ];
+    
+    rewards: {
+        experience: 750;
+        items: [
+            { item: "minecraft:emerald", count: 15 }
+        ];
+    };
+}
+
+quest defeatShadowLord {
+    title: "The Final Battle";
+    description: "Confront and defeat the Shadow Lord to save the realm.";
+    prerequisites: ["findFirstPiece", "findSecondPiece", "findThirdPiece"];
+    
+    objectives: [
+        {
+            id: "assembleArtifact";
+            description: "Assemble the Celestial Orb";
+            type: "custom";
+            count: 1;
+        },
+        {
+            id: "enterShadowRealm";
+            description: "Enter the Shadow Realm";
+            type: "reach_location";
+            region: "shadow_realm_entrance";
+            count: 1;
+        },
+        {
+            id: "defeatShadowLord";
+            description: "Defeat the Shadow Lord";
+            type: "kill_entity";
+            target: "shadow_lord";
+            count: 1;
+        }
+    ];
+    
+    rewards: {
+        experience: 5000;
+        items: [
+            { item: "minecraft:nether_star", count: 1 },
+            { item: "minecraft:diamond_block", count: 5 }
+        ];
+    };
+}
+
+// ===== BOSS DEFINITIONS =====
+
+// Mine Guardian - First boss
+function spawnMineGuardian(player) {
+    var bossId = spawnBoss("mine_guardian", {
+        name: "Mine Guardian",
+        entityType: "minecraft:iron_golem",
+        health: 200,
+        damage: 15,
+        position: vec3(200, 30, 0),
+        phases: [
+            {
+                healthThreshold: 1.0,
+                abilities: ["slam", "rockThrow"]
+            },
+            {
+                healthThreshold: 0.5,
+                abilities: ["slam", "rockThrow", "summonMinions"]
+            },
+            {
+                healthThreshold: 0.25,
+                abilities: ["slam", "rockThrow", "summonMinions", "enrage"]
+            }
+        ]
+    });
+    
+    // Show boss bar
+    showBossBar(player, bossId, "Mine Guardian", "red");
+    
+    // Play boss music
+    playMusic(player, "boss_battle_1", true, 2.0);
+    
+    return bossId;
+}
+
+// Shadow Lord - Final boss
+function spawnShadowLord(player) {
+    var bossId = spawnBoss("shadow_lord", {
+        name: "The Shadow Lord",
+        entityType: "minecraft:wither",
+        health: 1000,
+        damage: 30,
+        position: vec3(0, 100, 0),
+        dimension: "shadow_realm",
+        phases: [
+            {
+                healthThreshold: 1.0,
+                name: "Awakening",
+                abilities: ["shadowBolt", "darkWave"]
+            },
+            {
+                healthThreshold: 0.75,
+                name: "Rising Darkness",
+                abilities: ["shadowBolt", "darkWave", "summonShades"]
+            },
+            {
+                healthThreshold: 0.5,
+                name: "Eclipse",
+                abilities: ["shadowBolt", "darkWave", "summonShades", "voidStorm"],
+                onEnter: shadowLordPhase2Cutscene
+            },
+            {
+                healthThreshold: 0.25,
+                name: "Desperation",
+                abilities: ["shadowBolt", "darkWave", "summonShades", "voidStorm", "ultimateDarkness"],
+                onEnter: shadowLordPhase3Cutscene
+            }
+        ]
+    });
+    
+    showBossBar(player, bossId, "The Shadow Lord", "purple");
+    playMusic(player, "final_boss", true, 3.0);
+    
+    return bossId;
+}
+
+// ===== CUTSCENES =====
+
+function introductionCutscene(player) {
+    startCutscene(player, {
+        disableMovement: true,
+        hideHUD: true,
+        waypoints: [
+            { position: vec3(0, 100, -50), lookAt: vec3(0, 70, 0), duration: 3000 },
+            { position: vec3(20, 80, -30), lookAt: vec3(0, 70, 0), duration: 2000 },
+            { position: vec3(0, 75, -10), lookAt: vec3(0, 70, 0), duration: 2000 }
+        ],
+        onComplete: endIntroCutscene
+    });
+    
+    // Spawn particles during cutscene
+    scheduleDelayed(1000, spawnMysticalParticles);
+    
+    // Play ambient music
+    playMusic(player, "mysterious_intro", false, 1.0);
+}
+
+function shadowLordPhase2Cutscene(player) {
+    startCutscene(player, {
+        disableMovement: true,
+        duration: 5000,
+        waypoints: [
+            { position: vec3(0, 120, 30), lookAt: vec3(0, 100, 0), duration: 2500 },
+            { position: vec3(-20, 110, 20), lookAt: vec3(0, 100, 0), duration: 2500 }
+        ]
+    });
+    
+    // Boss dialogue during cutscene
+    scheduleDelayed(1000, showBossDialogue, "You think you can defeat me?");
+    scheduleDelayed(3000, showBossDialogue, "I am eternal darkness!");
+    
+    // Visual effects
+    spawnParticles("minecraft:soul_fire_flame", vec3(0, 100, 0), 100, 5.0);
+}
+
+function shadowLordPhase3Cutscene(player) {
+    // Screen shake effect
+    shakeScreen(player, 2.0, 3000);
+    
+    // Dramatic lighting change
+    setWorldTime(18000); // Midnight
+    
+    // Boss transformation particles
+    for (var i = 0; i < 360; i = i + 10) {
+        var x = 10 * cos(i);
+        var z = 10 * sin(i);
+        spawnParticles("minecraft:dragon_breath", vec3(x, 100, z), 20, 2.0);
+    }
+}
+
+// ===== EVENT HANDLERS =====
+
+on playerJoin {
+    var player = event.player;
+    
+    // Check if this is a new player
+    var hasStarted = getPlayerVar(player, "hasMetOracle");
+    
+    if (hasStarted == null || hasStarted == false) {
+        // New player - show introduction
+        scheduleDelayed(2000, introductionCutscene, player);
+    } else {
+        // Returning player - welcome back
+        sendMessage(player, "Welcome back, adventurer.");
+        sendMessage(player, "Your quest continues...");
+    }
+}
+
+on npcInteract {
+    var npcName = event.npc;
+    var player = event.player;
+    
+    if (npcName == "oracle") {
+        var hasMetOracle = getPlayerVar(player, "hasMetOracle");
+        if (hasMetOracle == true) {
+            showDialogue(player, "oracleReturning");
+        } else {
+            showDialogue(player, "oracleFirstMeeting");
+        }
+    }
+    
+    if (npcName == "blacksmith") {
+        showDialogue(player, "blacksmithQuest");
+    }
+    
+    if (npcName == "villageElder") {
+        showDialogue(player, "elderDialogue");
+    }
+    
+    if (npcName == "mysteriousStranger") {
+        // This NPC gives hints based on reputation
+        var reputation = getPlayerVar(player, "reputation");
+        if (reputation >= 50) {
+            showDialogue(player, "strangerSecrets");
+        } else {
+            showDialogue(player, "strangerCryptic");
+        }
+    }
+}
+
+on regionEnter {
+    var regionId = event.region;
+    var player = event.player;
+    
+    if (regionId == "mine_entrance") {
+        if (hasActiveQuest(player, "findFirstPiece")) {
+            updateObjective(player, "findFirstPiece", "enterMine", 1);
+            sendMessage(player, "You've entered the Abandoned Mine. Be careful...");
+            playSound(player, "ambient.cave", 1.0, 1.0);
+        }
+    }
+    
+    if (regionId == "guardian_chamber") {
+        if (hasActiveQuest(player, "findFirstPiece")) {
+            // Spawn the boss
+            spawnMineGuardian(player);
+            
+            // Lock the room
+            setBlock(200, 30, -5, "minecraft:iron_bars");
+            setBlock(200, 31, -5, "minecraft:iron_bars");
+            setBlock(200, 32, -5, "minecraft:iron_bars");
+        }
+    }
+    
+    if (regionId == "shadow_realm_entrance") {
+        if (hasActiveQuest(player, "defeatShadowLord")) {
+            updateObjective(player, "defeatShadowLord", "enterShadowRealm", 1);
+            
+            // Dramatic entrance
+            playSound(player, "entity.wither.spawn", 1.0, 0.5);
+            shakeScreen(player, 1.5, 2000);
+            
+            // Spawn the final boss after delay
+            scheduleDelayed(3000, spawnShadowLord, player);
+        }
+    }
+}
+
+on entityDeath {
+    var entityId = event.entity;
+    var player = event.player;
+    
+    if (entityId == "mine_guardian") {
+        // Boss defeated
+        updateObjective(player, "findFirstPiece", "defeatGuardian", 1);
+        
+        // Stop boss music
+        stopMusic(player, 2.0);
+        playMusic(player, "victory_fanfare", false, 0.5);
+        
+        // Spawn the artifact fragment
+        spawnItem(vec3(200, 30, 0), "artifact_fragment_1", 1);
+        
+        // Unlock the room
+        setBlock(200, 30, -5, "minecraft:air");
+        setBlock(200, 31, -5, "minecraft:air");
+        setBlock(200, 32, -5, "minecraft:air");
+        
+        // Celebration particles
+        spawnParticles("minecraft:totem_of_undying", vec3(200, 32, 0), 50, 3.0);
+    }
+    
+    if (entityId == "shadow_lord") {
+        // Final boss defeated!
+        updateObjective(player, "defeatShadowLord", "defeatShadowLord", 1);
+        
+        // Epic victory sequence
+        stopMusic(player, 1.0);
+        scheduleDelayed(2000, playVictorySequence, player);
+    }
+}
+
+on questComplete {
+    var questId = event.quest;
+    var player = event.player;
+    
+    if (questId == "findFirstPiece") {
+        setPlayerVar(player, "artifactPieces", 1);
+        addReputation(player, 25);
+        sendMessage(player, "You found the first artifact piece!");
+        startQuest(player, "findSecondPiece");
+    }
+    
+    if (questId == "defeatShadowLord") {
+        // Game complete!
+        setPlayerVar(player, "gameComplete", true);
+        addReputation(player, 100);
+        
+        // Show credits
+        scheduleDelayed(5000, showCredits, player);
+    }
+}
+
+// ===== HELPER FUNCTIONS =====
+
+function addReputation(player, amount) {
+    var current = getPlayerVar(player, "reputation");
+    if (current == null) {
+        current = 0;
+    }
+    setPlayerVar(player, "reputation", current + amount);
+    
+    if (amount > 0) {
+        sendMessage(player, "+" + amount + " Reputation");
+    }
+}
+
+function showBossDialogue(message) {
+    // Display boss dialogue on screen
+    showTitle("", message, 10, 40, 10);
+}
+
+function spawnMysticalParticles() {
+    spawnParticles("minecraft:enchant", vec3(0, 72, 0), 30, 2.0);
+}
+
+function endIntroCutscene(player) {
+    sendMessage(player, "Approach the Oracle to begin your journey...");
+}
+
+function playVictorySequence(player) {
+    playMusic(player, "victory_theme", false, 1.0);
+    
+    // Fireworks!
+    for (var i = 0; i < 10; i = i + 1) {
+        var delay = i * 500;
+        var x = random(-20, 20);
+        var z = random(-20, 20);
+        scheduleDelayed(delay, launchFirework, vec3(x, 100, z));
+    }
+    
+    // Restore the world
+    setWorldTime(6000); // Morning
+    
+    sendMessage(player, "You have saved the realm!");
+    sendMessage(player, "The Shadow Lord is defeated forever!");
+}
+
+function launchFirework(position) {
+    spawnFirework(position, {
+        colors: ["red", "gold", "white"],
+        fadeColors: ["orange", "yellow"],
+        type: "star",
+        trail: true,
+        flicker: true
+    });
+}
+
+function showCredits(player) {
+    startCutscene(player, {
+        disableMovement: true,
+        hideHUD: true,
+        duration: 30000
+    });
+    
+    // Display credits text
+    scheduleDelayed(1000, showTitle, "THE END", "", 20, 60, 20);
+    scheduleDelayed(4000, showTitle, "", "Thank you for playing", 20, 40, 20);
+    scheduleDelayed(7000, showTitle, "The Lost Artifact", "A Storykee Story", 20, 60, 20);
+    scheduleDelayed(12000, showTitle, "Created with", "Storykee Engine", 20, 40, 20);
+}
+
+// ===== JAVA SECTION EXAMPLE =====
+// For advanced functionality, you can embed Java code
+
+#java-section-start
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectInstance;
+
+public class AdvancedEffects {
+    public static void applyHeroicBuff(ServerPlayer player) {
+        // Apply multiple effects for the final battle
+        player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 6000, 1));
+        player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 6000, 1));
+        player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 6000, 0));
+        player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 6000, 0));
+    }
+    
+    public static void createDramaticLightning(ServerPlayer player, double x, double y, double z) {
+        // Spawn lightning for dramatic effect
+        var world = player.serverLevel();
+        var lightning = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(world);
+        if (lightning != null) {
+            lightning.moveTo(x, y, z);
+            lightning.setVisualOnly(true); // No damage
+            world.addFreshEntity(lightning);
+        }
+    }
+}
+#java-section-end

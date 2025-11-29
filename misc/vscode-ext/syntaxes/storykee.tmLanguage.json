@@ -1,0 +1,217 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Storykee",
+  "scopeName": "source.storykee",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#java-section" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#keywords" },
+    { "include": "#declarations" },
+    { "include": "#events" },
+    { "include": "#builtins" },
+    { "include": "#operators" },
+    { "include": "#punctuation" },
+    { "include": "#identifiers" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.storykee",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.storykee",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "java-section": {
+      "name": "meta.embedded.block.java",
+      "begin": "#java-section-start",
+      "end": "#java-section-end",
+      "beginCaptures": {
+        "0": { "name": "keyword.control.storykee" }
+      },
+      "endCaptures": {
+        "0": { "name": "keyword.control.storykee" }
+      },
+      "patterns": [
+        { "include": "source.java" }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.storykee",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.storykee",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.storykee",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.storykee",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.storykee",
+          "match": "\\b[0-9]+(\\.[0-9]+)?\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.storykee",
+          "match": "\\b(if|else|for|while|return|in)\\b"
+        },
+        {
+          "name": "storage.type.storykee",
+          "match": "\\b(var|function)\\b"
+        },
+        {
+          "name": "constant.language.storykee",
+          "match": "\\b(true|false|null)\\b"
+        }
+      ]
+    },
+    "declarations": {
+      "patterns": [
+        {
+          "name": "keyword.declaration.npc.storykee",
+          "match": "\\b(npc)\\b"
+        },
+        {
+          "name": "keyword.declaration.dialogue.storykee",
+          "match": "\\b(dialogue)\\b"
+        },
+        {
+          "name": "keyword.declaration.quest.storykee",
+          "match": "\\b(quest)\\b"
+        },
+        {
+          "name": "keyword.declaration.node.storykee",
+          "match": "\\b(node)\\b"
+        },
+        {
+          "match": "\\b(npc|dialogue|quest)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+          "captures": {
+            "1": { "name": "keyword.declaration.storykee" },
+            "2": { "name": "entity.name.type.storykee" }
+          }
+        },
+        {
+          "match": "\\b(node)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+          "captures": {
+            "1": { "name": "keyword.declaration.storykee" },
+            "2": { "name": "entity.name.function.storykee" }
+          }
+        },
+        {
+          "match": "\\b(function)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(",
+          "captures": {
+            "1": { "name": "storage.type.function.storykee" },
+            "2": { "name": "entity.name.function.storykee" }
+          }
+        }
+      ]
+    },
+    "events": {
+      "patterns": [
+        {
+          "name": "keyword.control.event.storykee",
+          "match": "\\b(on)\\b"
+        },
+        {
+          "match": "\\b(on)\\s+(playerJoin|playerLeave|npcInteract|regionEnter|regionLeave|entityDeath|questComplete|questStart|blockBreak|blockPlace|itemPickup|itemDrop|chatMessage)\\b",
+          "captures": {
+            "1": { "name": "keyword.control.event.storykee" },
+            "2": { "name": "support.type.event.storykee" }
+          }
+        }
+      ]
+    },
+    "builtins": {
+      "patterns": [
+        {
+          "name": "support.function.storykee",
+          "match": "\\b(print|sendMessage|showDialogue|startQuest|completeQuest|updateObjective|hasActiveQuest|giveItem|takeItem|getPlayerVar|setPlayerVar|spawnBoss|showBossBar|hideBossBar|playSound|playMusic|stopMusic|spawnParticles|startCutscene|endCutscene|teleportPlayer|setBlock|getBlock|createWaypoint|removeWaypoint|scheduleDelayed|scheduleRepeating|cancelSchedule|showTitle|showActionBar|shakeScreen|setWorldTime|setWeather|spawnEntity|removeEntity|spawnFirework|addEffect|removeEffect|vec3|random)\\b"
+        },
+        {
+          "name": "variable.language.storykee",
+          "match": "\\b(event|player|this)\\b"
+        },
+        {
+          "name": "support.type.property.storykee",
+          "match": "\\b(name|skin|position|dimension|invulnerable|health|damage|speaker|text|choices|next|action|condition|fallback|title|description|objectives|rewards|prerequisites|id|type|target|count|experience|items|item|phases|healthThreshold|abilities|onEnter|onComplete|waypoints|lookAt|duration|disableMovement|hideHUD|entityType)\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.comparison.storykee",
+          "match": "(==|!=|<=|>=|<|>)"
+        },
+        {
+          "name": "keyword.operator.logical.storykee",
+          "match": "(&&|\\|\\||!)"
+        },
+        {
+          "name": "keyword.operator.arithmetic.storykee",
+          "match": "(\\+|-|\\*|/|%)"
+        },
+        {
+          "name": "keyword.operator.assignment.storykee",
+          "match": "="
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.definition.block.storykee",
+          "match": "[{}]"
+        },
+        {
+          "name": "punctuation.definition.array.storykee",
+          "match": "[\\[\\]]"
+        },
+        {
+          "name": "punctuation.definition.parameters.storykee",
+          "match": "[()]"
+        },
+        {
+          "name": "punctuation.separator.storykee",
+          "match": "[,;:]"
+        }
+      ]
+    },
+    "identifiers": {
+      "patterns": [
+        {
+          "name": "variable.other.storykee",
+          "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+        }
+      ]
+    }
+  }
+}

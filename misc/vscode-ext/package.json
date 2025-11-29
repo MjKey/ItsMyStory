@@ -1,0 +1,63 @@
+{
+  "name": "storykee-language",
+  "displayName": "Storykee Language Support",
+  "description": "Syntax highlighting and IntelliSense for Storykee (.skee) scripting language",
+  "version": "1.0.0",
+  "publisher": "itsmystory",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets"
+  ],
+  "keywords": [
+    "storykee",
+    "minecraft",
+    "scripting",
+    "itsmystory",
+    "skee"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mjkey/itsmystory"
+  },
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "storykee",
+        "aliases": ["Storykee", "skee"],
+        "extensions": [".skee"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "storykee",
+        "scopeName": "source.storykee",
+        "path": "./syntaxes/storykee.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "storykee",
+        "path": "./snippets/storykee.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0"
+  }
+}

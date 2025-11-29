@@ -1,0 +1,31 @@
+{
+  "storyId": "my-story",
+  "version": "1.0.0",
+  "name": "My Story",
+  "author": "Your Name",
+  "description": "A brief description of your story",
+  "minecraftVersion": "1.21.10",
+  "dependencies": [],
+  "settings": {
+    "hotReload": true,
+    "debugMode": true,
+    "maxExecutionTimeMs": 5000,
+    "enableJavaSections": false
+  },
+  "permissions": {
+    "worldModification": false,
+    "playerModification": true,
+    "commandRegistration": false
+  },
+  "metadata": {
+    "difficulty": "normal",
+    "estimatedPlaytime": "30 minutes",
+    "tags": ["your", "tags", "here"]
+  },
+  "regions": {
+    "myRegion": {
+      "min": [-10, 60, -10],
+      "max": [10, 80, 10]
+    }
+  }
+}
